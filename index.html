@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG Remover — Unlimited AI Background Remover</title>
+<meta name="description" content="Professional AI background remover. Unlimited, no API key, processed locally in your browser.">
+<meta property="og:title" content="BG Remover">
+<meta property="og:description" content="Unlimited AI background removal — right in your browser.">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236d5cff'/%3E%3Cstop offset='1' stop-color='%2300c2a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0a0e1a; --panel:#11172b; --panel2:#161d33; --line:#232c47; --text:#eef1fb; --muted:#8b93b2;
+  --acc:#6d5cff; --acc2:#00c2a8; --danger:#ff5d7a; --ok:#2ee6a8; --checker:#3a4260; --radius:16px;
+  --shadow:0 18px 50px rgba(0,0,0,.45);
+}
+[data-theme="light"]{
+  --bg:#eef0f8; --panel:#ffffff; --panel2:#f4f6fc; --line:#dde2f0; --text:#131a2e; --muted:#68708c;
+  --checker:#c3c9dc; --shadow:0 18px 40px rgba(30,40,90,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -10%,rgba(109,92,255,.20),transparent 60%),
+    radial-gradient(700px 420px at -10% 110%,rgba(0,194,168,.14),transparent 55%),
+    var(--bg);
+  color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+header{
+  position:sticky;top:0;z-index:60;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid var(--line);
+}
+.hwrap{max-width:1240px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:11px}
+.mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--acc),var(--acc2));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#fff;box-shadow:0 8px 20px rgba(109,92,255,.4)}
+.brand b{font-size:16.5px;letter-spacing:.2px;display:block;line-height:1.1}
+.brand span{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+.spacer{flex:1}
+.iconbtn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.iconbtn:hover{border-color:var(--acc)}
+main{max-width:1240px;margin:0 auto;padding:26px 20px 30px}
+.headline{margin:6px 0 22px}
+.headline h1{font-size:clamp(26px,4.4vw,42px);margin:0;font-weight:800;letter-spacing:-.5px}
+.headline h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.workspace{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
+@media(max-width:900px){.workspace{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel .inner{padding:18px}
+.drop{
+  border:1.5px dashed var(--line);border-radius:14px;padding:30px 16px;text-align:center;cursor:pointer;transition:.18s;background:var(--panel2);
+}
+.drop:hover,.drop.over{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--panel2))}
+.drop .ic{font-size:30px;margin-bottom:8px}
+.drop b{font-size:15px;display:block}
+.drop p{margin:5px 0 0;color:var(--muted);font-size:12.5px}
+.group{margin-top:18px}
+.group>span{display:block;font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:8px 4px;border-radius:9px;font-size:13px;color:var(--muted);transition:.15s;white-space:nowrap}
+.seg button.on{background:linear-gradient(135deg,var(--acc),#5570ff);color:#fff;font-weight:600;box-shadow:0 6px 16px rgba(109,92,255,.35)}
+.seg button small{display:block;font-size:10px;font-weight:400;opacity:.75}
+.swatches{display:flex;gap:9px;align-items:center}
+.swatch{width:34px;height:34px;border-radius:10px;border:2px solid var(--line);cursor:pointer;padding:0;position:relative}
+.swatch.on{border-color:var(--acc);transform:scale(1.06)}
+.sw-transparent{background:repeating-conic-gradient(var(--checker) 0% 25%,transparent 0% 50%) 0 0/12px 12px}
+.sw-white{background:#fff}.sw-black{background:#000}
+input[type="color"].sw{padding:0;overflow:hidden;background:none}
+input[type="color"].sw::-webkit-color-swatch-wrapper{padding:0}
+input[type="color"].sw::-webkit-color-swatch{border:none;border-radius:8px}
+.actions{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+.btn{padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--panel2);display:inline-flex;align-items:center;gap:7px;transition:.15s}
+.btn:hover{border-color:var(--acc)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,var(--acc),#5570ff);color:#fff;border:none;flex:1;justify-content:center;box-shadow:0 10px 24px rgba(109,92,255,.35)}
+.btn.primary:hover{filter:brightness(1.08)}
+.progressWrap{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;margin-top:16px;display:none}
+.progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .2s;border-radius:99px}
+.statusLine{font-size:12.5px;color:var(--muted);margin-top:10px;min-height:16px}
+.queue{margin-top:6px;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto}
+.qitem{display:flex;gap:11px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--panel2)}
+.qitem.sel{border-color:var(--acc)}
+.qitem img{width:46px;height:46px;object-fit:cover;border-radius:8px;background:repeating-conic-gradient(var(--checker) 0% 25%,transparent 0% 50%) 0 0/10px 10px}
+.qitem .qm{flex:1;min-width:0}
+.qitem .qn{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qitem .qs{font-size:11.5px;color:var(--muted);margin-top:1px}
+.qbar{height:4px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:5px}
+.qbar div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:0%}
+.st-done{color:var(--ok)}.st-error{color:var(--danger)}.st-processing{color:var(--acc2)}
+.stage{min-height:480px;display:flex;flex-direction:column}
+.stageHead{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.stageHead b{font-size:14px}
+.stageBody{flex:1;display:flex;align-items:center;justify-content:center;padding:22px;position:relative}
+.empty{color:var(--muted);text-align:center;font-size:14px}
+.empty .ic{font-size:44px;opacity:.5;margin-bottom:10px}
+.cmpWrap{position:relative;width:100%;max-width:760px;border-radius:14px;overflow:hidden;
+  background:repeating-conic-gradient(var(--checker) 0% 25%,transparent 0% 50%) 0 0/24px 24px}
+.cmpWrap img{display:block;width:100%;user-select:none;-webkit-user-drag:none}
+#cmpOrig{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.cmpTop{position:absolute;inset:0}
+.cmpWrap{touch-action:none;cursor:ew-resize}
+.cmpDivider{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,30,.35);pointer-events:none}
+.cmpHandle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 14px rgba(0,0,30,.35)}
+.chip{position:absolute;top:10px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(8,10,22,.55);color:#fff;pointer-events:none;z-index:3}
+.chipL{left:10px}.chipR{right:10px}
+.qacts{display:flex;flex-direction:column;gap:5px}
+.qacts button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-size:12px;line-height:1}
+.qacts button:hover{border-color:var(--acc)}
+input[type="range"]{width:100%;accent-color:var(--acc)}
+.footRow{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+footer{border-top:1px solid var(--line);margin-top:14px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.fin{max-width:1240px;margin:0 auto;padding:30px 20px 20px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:26px}
+@media(max-width:700px){.fin{grid-template-columns:1fr}}
+.fin .fbrand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fin p{color:var(--muted);font-size:12.5px;line-height:1.6;margin:0;max-width:340px}
+.fin h4{margin:2px 0 12px;font-size:12px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+.fin ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.fin a{color:var(--text);text-decoration:none;font-size:13.5px;opacity:.85}
+.fin a:hover{opacity:1;color:var(--acc2)}
+.fbottom{max-width:1240px;margin:0 auto;padding:14px 20px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.bgrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.gpill{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:12.5px;display:inline-flex;align-items:center;gap:6px}
+.gpill.on{border-color:var(--acc);color:var(--acc2)}
+.gcirc{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);padding:0;cursor:pointer}
+.gcirc.on{border-color:var(--acc);transform:scale(1.08)}
+.g1{background:linear-gradient(135deg,#667eea,#764ba2)} .g2{background:linear-gradient(135deg,#ff9966,#ff5e62)} .g3{background:linear-gradient(135deg,#11998e,#38ef7d)}
+.togglerow{display:flex;align-items:center;justify-content:space-between;padding:9px 2px;font-size:13.5px}
+.switch{position:relative;width:44px;height:24px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch i{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:.18s;cursor:pointer}
+.switch i:before{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.18s}
+.switch input:checked + i{background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.switch input:checked + i:before{transform:translateX(20px)}
+.editbar{display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.editbar .seg{padding:3px}
+.editbar .seg button{padding:6px 12px;font-size:12.5px}
+.editbar input[type="range"]{width:110px}
+.editbar .btn{padding:7px 13px;font-size:12.5px}
+#editCanvas{display:none;max-width:100%;max-height:68vh;width:auto;height:auto;border-radius:12px;touch-action:none;cursor:crosshair;
+  background:repeating-conic-gradient(var(--checker) 0% 25%,transparent 0% 50%) 0 0/22px 22px}
+footer .fbar{max-width:1240px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+footer nav{display:flex;gap:6px 14px;flex-wrap:wrap}
+footer nav a{color:var(--muted);text-decoration:none}
+footer nav a:hover{color:var(--acc2)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <div class="mark">B</div>
+      <div><b>BG Remover</b><span data-i18n="tagline">AI Background Remover</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="langBtn" type="button" title="Language">EN</button>
+    <button class="iconbtn" id="themeBtn" type="button" title="Theme">☀️</button>
+  </div>
+</header>
+
+<main>
+  <div class="headline">
+    <h1 data-i18n-html="title">ব্যাকগ্রাউন্ড সরান, <em>নিখুঁতভাবে।</em></h1>
+  </div>
+
+  <div class="workspace">
+    <section class="panel"><div class="inner">
+      <div class="drop" id="dropZone" tabindex="0" role="button" aria-label="Upload">
+        <div class="ic">📁</div>
+        <b data-i18n="dropTitle">ছবি ছাড়ুন বা বেছে নিন</b>
+        <p data-i18n="dropSub">Drag & drop · Paste (Ctrl+V) · JPG / PNG / WebP</p>
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      </div>
+
+      <div class="group">
+        <span data-i18n="quality">মান</span>
+        <div class="seg" id="modelSeg">
+          <button type="button" data-v="large" class="on"><span data-i18n="qBest">সেরা</span></button>
+          <button type="button" data-v="medium"><span data-i18n="qBal">ভারসাম্য</span></button>
+          <button type="button" data-v="small"><span data-i18n="qFast">দ্রুত</span></button>
+        </div>
+      </div>
+
+      <div class="group">
+        <span data-i18n="device">ডিভাইস</span>
+        <div class="seg" id="deviceSeg">
+          <button type="button" data-v="auto" class="on" data-i18n="devAuto">অটো</button>
+          <button type="button" data-v="gpu">GPU</button>
+          <button type="button" data-v="cpu">CPU</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <span data-i18n="bg">ব্যাকগ্রাউন্ড</span>
+        <div class="swatches" id="bgSwatches">
+          <button type="button" class="swatch sw-transparent on" data-v="transparent" title="Transparent"></button>
+          <button type="button" class="swatch sw-white" data-v="white" title="White"></button>
+          <button type="button" class="swatch sw-black" data-v="black" title="Black"></button>
+          <input type="color" class="swatch sw" id="bgColor" value="#ff5757" title="Custom">
+        </div>
+        <div class="bgrow">
+          <button type="button" class="gpill" data-bgx="blur">🌫 <span data-i18n="bgBlur">ব্লার</span></button>
+          <button type="button" class="gcirc g1" data-bgx="g1" title="Gradient"></button>
+          <button type="button" class="gcirc g2" data-bgx="g2" title="Gradient"></button>
+          <button type="button" class="gcirc g3" data-bgx="g3" title="Gradient"></button>
+          <button type="button" class="gpill" id="bgPhotoBtn">🖼 <span data-i18n="bgPhoto">নিজের ছবি</span></button>
+          <input type="file" id="bgFile" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div class="group">
+        <span data-i18n="format">ফরম্যাট</span>
+        <div class="seg" id="formatSeg">
+          <button type="button" data-v="image/png" class="on">PNG</button>
+          <button type="button" data-v="image/webp">WebP</button>
+          <button type="button" data-v="image/jpeg">JPG</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <span data-i18n="sizeLbl">আউটপুট সাইজ</span>
+        <div class="seg" id="sizeSeg">
+          <button type="button" data-v="orig" class="on" data-i18n="sOrig">আসল</button>
+          <button type="button" data-v="square">1:1</button>
+          <button type="button" data-v="story">9:16</button>
+          <button type="button" data-v="wide">16:9</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <span data-i18n="effects">ইফেক্ট</span>
+        <div class="togglerow">
+          <span data-i18n="shadow">ছায়া (Shadow)</span>
+          <label class="switch"><input type="checkbox" id="shadowChk"><i></i></label>
+        </div>
+        <div class="togglerow">
+          <span data-i18n="flip">উল্টে দিন (Flip)</span>
+          <label class="switch"><input type="checkbox" id="flipChk"><i></i></label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="processBtn" type="button" data-i18n="process">ব্যাকগ্রাউন্ড সরাও</button>
+        <button class="btn" id="zipBtn" type="button" disabled>ZIP</button>
+        <button class="btn" id="clearBtn" type="button">✕</button>
+      </div>
+      <div class="progressWrap" id="gWrap"><div class="progressBar" id="gBar"></div></div>
+      <div class="statusLine" id="statusLine"></div>
+
+      <div class="group" id="queueGroup" style="display:none">
+        <span><span data-i18n="queue">তালিকা</span> · <span id="queueStats"></span></span>
+        <div class="queue" id="queue"></div>
+      </div>
+    </div></section>
+
+    <section class="panel stage">
+      <div class="stageHead">
+        <b data-i18n="preview">প্রিভিউ</b>
+        <div class="spacer"></div>
+        <span class="hint" id="pvInfo" style="font-size:12px;color:var(--muted)"></span>
+        <button class="btn" id="editBtn" type="button" style="display:none;padding:8px 15px">✏️ <span data-i18n="brush">Magic Brush</span></button>
+        <button class="btn" id="copyBtn" type="button" style="display:none;padding:8px 15px">📋 <span data-i18n="copy">কপি</span></button>
+        <button class="btn" id="dlBtn" type="button" style="display:none;padding:8px 15px" data-i18n="download">ডাউনলোড</button>
+      </div>
+      <div class="editbar" id="editBar">
+        <div class="seg" id="brushSeg">
+          <button type="button" data-v="erase" class="on" data-i18n="erase">মুছুন</button>
+          <button type="button" data-v="restore" data-i18n="restore">ফেরান</button>
+        </div>
+        <input type="range" id="brushSize" min="4" max="80" value="28" title="Brush size">
+        <button class="btn" id="undoBtn" type="button">↩ <span data-i18n="undo">Undo</span></button>
+        <button class="btn" id="redoBtn" type="button">↪ <span data-i18n="redo">Redo</span></button>
+        <div class="spacer"></div>
+        <button class="btn" id="editCancel" type="button" data-i18n="cancel">বাতিল</button>
+        <button class="btn primary" id="editDone" type="button" style="flex:none" data-i18n="apply">প্রয়োগ করুন</button>
+      </div>
+      <div class="stageBody">
+        <div class="empty" id="emptyState">
+          <div class="ic">🖼️</div>
+          <div data-i18n="empty">ছবি যোগ করলে এখানে ফলাফল দেখা যাবে</div>
+        </div>
+        <div class="cmpWrap" id="cmpWrap" style="display:none">
+          <img id="cmpResult" alt="Result">
+          <div class="cmpTop" id="cmpTop"><img id="cmpOrig" alt="Original"></div>
+          <span class="chip chipL" data-i18n="origLbl">আসল</span>
+          <span class="chip chipR" data-i18n="resLbl">ফলাফল</span>
+          <div class="cmpDivider" id="cmpDivider"><div class="cmpHandle">⇔</div></div>
+        </div>
+        <canvas id="editCanvas" width="0" height="0"></canvas>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="fbar">
+    <span>© 2026 <b style="color:var(--text)">BG Remover</b></span>
+    <nav>
+      <a href="https://mthtamim.bond/" target="_blank" rel="noopener" data-i18n="fAbout">আমার সম্পর্কে</a>
+      <a href="https://mthtamim.bond/" target="_blank" rel="noopener" data-i18n="fMain">মূল প্রজেক্ট</a>
+      <a href="https://cleaner.mthtamim.bond/" target="_blank" rel="noopener">Metadata Cleaner</a>
+      <a href="https://inspect.mthtamim.bond/" target="_blank" rel="noopener">Web Inspector</a>
+      <a href="https://railway.mthtamim.bond/" target="_blank" rel="noopener">Railway Simulator</a>
+      <a href="https://waves.mthtamim.bond/" target="_blank" rel="noopener">Waves Lab</a>
+    </nav>
+    <div class="spacer"></div>
+    <span data-i18n="foot">ছবি ব্রাউজারেই প্রসেস হয় — আপলোড হয় না।</span>
+  </div>
+</footer>
+<script type="module">
+const CDN = "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm";
+const JSZIP = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+const $ = s => document.querySelector(s);
+
+const I18N = {
+  bn: {
+    tagline:"AI Background Remover",
+    title:`ব্যাকগ্রাউন্ড সরান, <em>নিখুঁতভাবে।</em>`,
+    dropTitle:"ছবি ছাড়ুন বা বেছে নিন", dropSub:"Drag & drop · Paste (Ctrl+V) · JPG / PNG / WebP",
+    quality:"মান", qBest:"সেরা", qBal:"ভারসাম্য", qFast:"দ্রুত",
+    device:"ডিভাইস", devAuto:"অটো", bg:"ব্যাকগ্রাউন্ড", format:"ফরম্যাট",
+    process:"ব্যাকগ্রাউন্ড সরাও", queue:"তালিকা", preview:"প্রিভিউ", download:"ডাউনলোড",
+    origLbl:"আসল", resLbl:"ফলাফল", empty:"ছবি যোগ করলে এখানে ফলাফল দেখা যাবে",
+    foot:"ছবি আপনার ব্রাউজারেই প্রসেস হয় — সার্ভারে আপলোড হয় না।",
+    fProject:"প্রজেক্ট", fSpecial:"বিশেষ প্রজেক্ট", fAbout:"আমার সম্পর্কে", fMain:"মূল প্রজেক্ট",
+    bgBlur:"ব্লার", bgPhoto:"নিজের ছবি", sizeLbl:"আউটপুট সাইজ", sOrig:"আসল",
+    effects:"ইফেক্ট", shadow:"ছায়া (Shadow)", brush:"Magic Brush",
+    erase:"মুছুন", restore:"ফেরান", undo:"Undo", redo:"Redo", cancel:"বাতিল", apply:"প্রয়োগ করুন",
+    flip:"উল্টে দিন (Flip)", copy:"কপি", copied:"ছবি কপি হয়েছে — যেকোনো জায়গায় পেস্ট করুন।",
+    waiting:"অপেক্ষায়", processing:"প্রসেস হচ্ছে", done:"সম্পন্ন", error:"ব্যর্থ",
+    addFirst:"আগে অন্তত একটা ছবি যোগ করুন।", loadingLib:"লাইব্রেরি লোড হচ্ছে…",
+    dlModel:"মডেল ডাউনলোড হচ্ছে", computing:"AI প্রসেসিং চলছে",
+    allDone:"সব সম্পন্ন।", gpuRetry:"GPU ব্যর্থ — CPU দিয়ে আবার চেষ্টা হচ্ছে…",
+    failedMsg:"ব্যর্থ হয়েছে: ", stats:(d,t)=>`${d}/${t}`
+  },
+  en: {
+    tagline:"AI Background Remover",
+    title:`Remove backgrounds, <em>flawlessly.</em>`,
+    dropTitle:"Drop images or browse", dropSub:"Drag & drop · Paste (Ctrl+V) · JPG / PNG / WebP",
+    quality:"Quality", qBest:"Best", qBal:"Balanced", qFast:"Fast",
+    device:"Device", devAuto:"Auto", bg:"Background", format:"Format",
+    process:"Remove background", queue:"Queue", preview:"Preview", download:"Download",
+    origLbl:"Original", resLbl:"Result", empty:"Add images to see results here",
+    foot:"Images are processed in your browser — never uploaded to a server.",
+    fProject:"Project", fSpecial:"Special Projects", fAbout:"About Me", fMain:"Main Project",
+    bgBlur:"Blur", bgPhoto:"Your photo", sizeLbl:"Output size", sOrig:"Original",
+    effects:"Effects", shadow:"Shadow", brush:"Magic Brush",
+    erase:"Erase", restore:"Restore", undo:"Undo", redo:"Redo", cancel:"Cancel", apply:"Apply",
+    flip:"Flip horizontal", copy:"Copy", copied:"Image copied — paste it anywhere.",
+    waiting:"Waiting", processing:"Processing", done:"Done", error:"Failed",
+    addFirst:"Add at least one image first.", loadingLib:"Loading library…",
+    dlModel:"Downloading model", computing:"AI processing",
+    allDone:"All done.", gpuRetry:"GPU failed — retrying on CPU…",
+    failedMsg:"Failed: ", stats:(d,t)=>`${d}/${t}`
+  }
+};
+let lang = localStorage.getItem("bgremover-lang") || "bn";
+const t = k => I18N[lang][k];
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.getAttribute("data-i18n");
+    if (I18N[lang][k]) el.textContent = I18N[lang][k];
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{
+    const k = el.getAttribute("data-i18n-html");
+    if (I18N[lang][k]) el.innerHTML = I18N[lang][k];
+  });
+  $("#langBtn").textContent = lang === "bn" ? "EN" : "বাংলা";
+  renderQueue();
+}
+$("#langBtn").addEventListener("click", ()=>{
+  lang = lang === "bn" ? "en" : "bn";
+  localStorage.setItem("bgremover-lang", lang); applyLang();
+});
+function applyTheme(th){
+  document.documentElement.setAttribute("data-theme", th);
+  $("#themeBtn").textContent = th === "dark" ? "☀️" : "🌙";
+  localStorage.setItem("bgremover-theme", th);
+}
+applyTheme(localStorage.getItem("bgremover-theme") || "dark");
+$("#themeBtn").addEventListener("click", ()=>{
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+});
+
+/* segmented controls */
+function segValue(id){
+  const b = document.querySelector(`#${id} button.on`);
+  return b ? b.dataset.v : null;
+}
+function wireSeg(id, onChange){
+  document.querySelectorAll(`#${id} button`).forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(`#${id} button`).forEach(x=> x.classList.remove("on"));
+      btn.classList.add("on");
+      if (onChange) onChange(btn.dataset.v);
+    });
+  });
+}
+let bgChoice = "transparent";
+let bgBitmap = null;                       // user's own background photo
+const GRADIENTS = { g1:["#667eea","#764ba2"], g2:["#ff9966","#ff5e62"], g3:["#11998e","#38ef7d"] };
+function clearBgSelection(){
+  document.querySelectorAll("#bgSwatches .swatch, .bgrow .gpill, .bgrow .gcirc")
+    .forEach(x=> x.classList.remove("on"));
+}
+function setBg(choice, el){
+  bgChoice = choice;
+  clearBgSelection();
+  if (el) el.classList.add("on");
+  reconvertAll();
+}
+$("#bgColor").addEventListener("input", ()=> setBg("custom", $("#bgColor")));
+document.querySelectorAll("#bgSwatches .swatch[data-v]").forEach(sw=>{
+  sw.addEventListener("click", ()=> setBg(sw.dataset.v, sw));
+});
+document.querySelectorAll("[data-bgx]").forEach(el=>{
+  el.addEventListener("click", ()=> setBg(el.dataset.bgx, el));
+});
+$("#bgPhotoBtn").addEventListener("click", ()=> $("#bgFile").click());
+$("#bgFile").addEventListener("change", async ()=>{
+  const f = $("#bgFile").files[0];
+  $("#bgFile").value = "";
+  if (!f) return;
+  bgBitmap = await createImageBitmap(f);
+  setBg("photo", $("#bgPhotoBtn"));
+});
+wireSeg("formatSeg", reconvertAll);
+wireSeg("sizeSeg", reconvertAll);
+$("#shadowChk").addEventListener("change", reconvertAll);
+$("#flipChk").addEventListener("change", reconvertAll);
+wireSeg("modelSeg"); wireSeg("deviceSeg");
+const getSize = ()=> segValue("sizeSeg") || "orig";
+const getModel = ()=> segValue("modelSeg") || "large";     // default: most accurate
+const getFormat = ()=> segValue("formatSeg") || "image/png";
+function chosenDevice(){
+  const v = segValue("deviceSeg") || "auto";
+  if (v !== "auto") return v;
+  return ("gpu" in navigator) ? "gpu" : "cpu";
+}
+
+/* state */
+let items = [], selectedId = null, libPromise = null, processing = false, idSeq = 1;
+function setStatus(m){ $("#statusLine").textContent = m || ""; }
+function setGlobalProgress(pct, show){
+  $("#gWrap").style.display = show ? "block" : "none";
+  if (typeof pct === "number") $("#gBar").style.width = Math.max(0, Math.min(100, pct)) + "%";
+}
+const fmtSize = b => !b ? "" : b < 1024 ? b + " B" : b < 1048576 ? (b/1024).toFixed(1) + " KB" : (b/1048576).toFixed(2) + " MB";
+
+function addFiles(list){
+  const files = [...list].filter(f => f.type.startsWith("image/"));
+  for (const f of files){
+    items.push({ id:idSeq++, file:f, name:f.name || ("pasted-" + Date.now() + ".png"),
+      origUrl:URL.createObjectURL(f), status:"waiting", progress:0,
+      alphaBlob:null, outBlob:null, outUrl:null, error:"", timeMs:0 });
+  }
+  if (files.length){
+    $("#queueGroup").style.display = "";
+    if (!selectedId) selectedId = items[0].id;
+    renderQueue(); updateZipBtn();
+  }
+}
+const drop = $("#dropZone"), input = $("#fileInput");
+drop.addEventListener("click", ()=> input.click());
+drop.addEventListener("keydown", e=>{ if (e.key === "Enter" || e.key === " ") input.click(); });
+input.addEventListener("change", ()=>{ addFiles(input.files); input.value = ""; });
+["dragenter","dragover"].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e=> addFiles(e.dataTransfer.files));
+window.addEventListener("paste", e=>{ if (e.clipboardData?.files.length) addFiles(e.clipboardData.files); });
+window.addEventListener("dragover", e=> e.preventDefault());
+window.addEventListener("drop", e=> e.preventDefault());
+
+$("#clearBtn").addEventListener("click", ()=>{
+  for (const it of items){ URL.revokeObjectURL(it.origUrl); if (it.outUrl) URL.revokeObjectURL(it.outUrl); }
+  items = []; selectedId = null;
+  $("#queueGroup").style.display = "none";
+  showPreview(); renderQueue(); updateZipBtn(); setStatus("");
+});
+
+function removeItem(id){
+  const idx = items.findIndex(i=> i.id === id);
+  if (idx < 0) return;
+  const [it] = items.splice(idx, 1);
+  URL.revokeObjectURL(it.origUrl);
+  if (it.outUrl) URL.revokeObjectURL(it.outUrl);
+  if (selectedId === id) selectedId = items.length ? items[0].id : null;
+  if (!items.length) $("#queueGroup").style.display = "none";
+  renderQueue(); updateZipBtn(); showPreview();
+}
+function renderQueue(){
+  const q = $("#queue"); q.innerHTML = "";
+  for (const it of items){
+    const div = document.createElement("div");
+    div.className = "qitem" + (it.id === selectedId ? " sel" : "");
+    const shown = (it.status === "done" && it.outUrl) ? it.outUrl : it.origUrl;
+    const st = it.status === "done" ? t("done") : it.status === "error" ? t("error")
+             : it.status === "processing" ? t("processing") : t("waiting");
+    const extra = it.status === "done" ? ` · ${fmtSize(it.outBlob.size)} · ${(it.timeMs/1000).toFixed(1)}s`
+                : it.status === "error" ? ` · ${it.error}` : "";
+    div.innerHTML = `<img alt=""><div class="qm"><div class="qn"></div>
+      <div class="qs"><span class="st-${it.status}">${st}</span>${extra}</div>
+      <div class="qbar"><div style="width:${it.progress||0}%"></div></div></div>
+      <div class="qacts"><button class="qdl" title="Download">⬇</button><button class="qrm" title="Remove">✕</button></div>`;
+    div.querySelector("img").src = shown;
+    div.querySelector(".qn").textContent = it.name;
+    div.querySelector(".qdl").style.display = it.status === "done" ? "" : "none";
+    div.querySelector(".qdl").addEventListener("click", ev=>{
+      ev.stopPropagation();
+      if (it.outUrl){ const a = document.createElement("a"); a.href = it.outUrl; a.download = outName(it); a.click(); }
+    });
+    div.querySelector(".qrm").addEventListener("click", ev=>{ ev.stopPropagation(); removeItem(it.id); });
+    div.addEventListener("click", ()=>{ selectedId = it.id; renderQueue(); showPreview(); });
+    q.appendChild(div);
+  }
+  const done = items.filter(i=> i.status === "done").length;
+  $("#queueStats").textContent = items.length ? I18N[lang].stats(done, items.length) : "";
+}
+function updateZipBtn(){ $("#zipBtn").disabled = !items.some(i=> i.status === "done"); }
+
+/* ---------- AI engine ---------- */
+function loadLib(){
+  if (!libPromise) libPromise = import(/* @vite-ignore */CDN);
+  return libPromise;
+}
+function makeProgressHandler(item){
+  const seen = new Map();
+  return (key, current, total)=>{
+    seen.set(key, [current, total]);
+    let c = 0, tot = 0;
+    for (const [a,b] of seen.values()){ c += a; tot += b; }
+    const pct = tot ? Math.round(c/tot*100) : 0;
+    item.progress = pct;
+    setStatus(`${item.name} — ${String(key).startsWith("fetch") ? t("dlModel") : t("computing")} ${pct}%`);
+    setGlobalProgress(pct, true);
+    renderQueue();
+  };
+}
+const buildConfig = (item, device)=> ({
+  model: getModel(), device,
+  output: { format:"image/png", quality:1, type:"foreground" },
+  progress: makeProgressHandler(item)
+});
+async function processItem(item){
+  const lib = await loadLib();
+  const device = chosenDevice();
+  try {
+    return await lib.removeBackground(item.file, buildConfig(item, device));
+  } catch (e) {
+    if (device === "gpu"){
+      setStatus(t("gpuRetry")); item.progress = 0;
+      return await lib.removeBackground(item.file, buildConfig(item, "cpu"));
+    }
+    throw e;
+  }
+}
+function coverRect(ctx, img, W, H){
+  const s = Math.max(W / img.width, H / img.height);
+  const w = img.width * s, h = img.height * s;
+  ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+}
+async function composite(item){
+  const fmt = getFormat();
+  const subj0 = await createImageBitmap(item.alphaBlob);
+  let subj = subj0;
+  if ($("#flipChk").checked){
+    const fc = document.createElement("canvas");
+    fc.width = subj0.width; fc.height = subj0.height;
+    const fx = fc.getContext("2d");
+    fx.translate(subj0.width, 0); fx.scale(-1, 1);
+    fx.drawImage(subj0, 0, 0);
+    subj = fc;
+  }
+  const sizeMode = getSize();
+  const dims = sizeMode === "square" ? [1080, 1080]
+             : sizeMode === "story"  ? [1080, 1920]
+             : sizeMode === "wide"   ? [1920, 1080]
+             : [subj.width, subj.height];
+  const [W, H] = dims;
+  // fast path: original size, transparent, no shadow/flip, PNG/WebP -> return AI output as-is
+  if (sizeMode === "orig" && bgChoice === "transparent" && !$("#shadowChk").checked
+      && !$("#flipChk").checked && fmt !== "image/jpeg"){
+    return fmt === "image/png" ? item.alphaBlob : canvasConvert(item.alphaBlob, fmt);
+  }
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  /* background layer */
+  if (bgChoice === "white" || bgChoice === "black" || bgChoice === "custom"){
+    ctx.fillStyle = bgChoice === "white" ? "#ffffff" : bgChoice === "black" ? "#000000" : $("#bgColor").value;
+    ctx.fillRect(0, 0, W, H);
+  } else if (GRADIENTS[bgChoice]){
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, GRADIENTS[bgChoice][0]); g.addColorStop(1, GRADIENTS[bgChoice][1]);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  } else if (bgChoice === "blur"){
+    const orig = await createImageBitmap(item.file);
+    ctx.save();
+    ctx.filter = "blur(28px)";
+    const s = Math.max(W / orig.width, H / orig.height) * 1.12;
+    ctx.drawImage(orig, (W - orig.width * s) / 2, (H - orig.height * s) / 2, orig.width * s, orig.height * s);
+    ctx.restore();
+  } else if (bgChoice === "photo" && bgBitmap){
+    coverRect(ctx, bgBitmap, W, H);
+  } else if (fmt === "image/jpeg"){
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);   // JPG has no transparency
+  }
+  /* subject placement (contain, centred) */
+  const scale = Math.min(W / subj.width, H / subj.height);
+  const w = subj.width * scale, h = subj.height * scale;
+  const x = (W - w) / 2, y = (H - h) / 2;
+  /* shadow layer */
+  if ($("#shadowChk").checked){
+    const sil = document.createElement("canvas");
+    sil.width = subj.width; sil.height = subj.height;
+    const sctx = sil.getContext("2d");
+    sctx.drawImage(subj, 0, 0);
+    sctx.globalCompositeOperation = "source-in";
+    sctx.fillStyle = "#000"; sctx.fillRect(0, 0, sil.width, sil.height);
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    ctx.filter = `blur(${Math.max(6, Math.round(14 * scale))}px)`;
+    ctx.drawImage(sil, x, y + H * 0.018, w, h);
+    ctx.restore();
+  }
+  ctx.drawImage(subj, x, y, w, h);
+  return await new Promise(res => c.toBlob(res, fmt, 0.92));
+}
+async function canvasConvert(blob, fmt){
+  const bmp = await createImageBitmap(blob);
+  const c = document.createElement("canvas");
+  c.width = bmp.width; c.height = bmp.height;
+  c.getContext("2d").drawImage(bmp, 0, 0);
+  return await new Promise(res => c.toBlob(res, fmt, 0.92));
+}
+async function refreshOutput(item){
+  if (!item.alphaBlob) return;
+  const blob = await composite(item);
+  if (item.outUrl) URL.revokeObjectURL(item.outUrl);
+  item.outBlob = blob;
+  item.outUrl = URL.createObjectURL(blob);
+}
+async function reconvertAll(){
+  for (const it of items) if (it.status === "done") await refreshOutput(it);
+  renderQueue(); showPreview();
+}
+
+$("#processBtn").addEventListener("click", async ()=>{
+  if (processing) return;
+  const todoItems = items.filter(i=> i.status === "waiting" || i.status === "error");
+  if (!todoItems.length){ setStatus(items.length ? t("allDone") : t("addFirst")); return; }
+  processing = true; $("#processBtn").disabled = true;
+  setStatus(t("loadingLib"));
+  try { await loadLib(); }
+  catch(e){ setStatus(t("failedMsg") + e.message); processing = false; $("#processBtn").disabled = false; return; }
+  for (const item of todoItems){
+    item.status = "processing"; item.progress = 0; item.error = "";
+    renderQueue();
+    const started = performance.now();
+    try {
+      item.alphaBlob = await processItem(item);
+      item.timeMs = performance.now() - started;
+      await refreshOutput(item);
+      item.status = "done"; item.progress = 100;
+      selectedId = item.id; showPreview();
+    } catch (e) {
+      item.status = "error"; item.error = String(e.message || e).slice(0, 60);
+      setStatus(t("failedMsg") + item.name);
+    }
+    renderQueue(); updateZipBtn();
+  }
+  processing = false; $("#processBtn").disabled = false;
+  setGlobalProgress(100, false); setStatus(t("allDone"));
+});
+
+/* preview */
+function showPreview(){
+  if (editing && editItemId !== selectedId) exitEdit();
+  const it = items.find(i=> i.id === selectedId);
+  const has = it && it.status === "done";
+  $("#emptyState").style.display = has ? "none" : "";
+  $("#cmpWrap").style.display = (has && !editing) ? "" : "none";
+  $("#dlBtn").style.display = has ? "" : "none";
+  $("#copyBtn").style.display = has ? "" : "none";
+  $("#editBtn").style.display = has ? "" : "none";
+  if (!has){ $("#pvInfo").textContent = ""; return; }
+  $("#cmpResult").src = it.outUrl;
+  $("#cmpOrig").src = it.origUrl;
+  $("#pvInfo").textContent = `${fmtSize(it.outBlob.size)} · ${(it.timeMs/1000).toFixed(1)}s`;
+  applyCompare();
+}
+/* in-image before/after compare — drag anywhere on the preview */
+let cmpPos = 50, cmpDragging = false;
+function applyCompare(){
+  $("#cmpTop").style.clipPath = `inset(0 ${100 - cmpPos}% 0 0)`;
+  $("#cmpDivider").style.left = cmpPos + "%";
+}
+function cmpFromEvent(ev){
+  const r = $("#cmpWrap").getBoundingClientRect();
+  cmpPos = Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100));
+  applyCompare();
+}
+$("#cmpWrap").addEventListener("pointerdown", ev=>{ cmpDragging = true; try{ $("#cmpWrap").setPointerCapture(ev.pointerId); }catch(_){} cmpFromEvent(ev); });
+$("#cmpWrap").addEventListener("pointermove", ev=>{ if (cmpDragging) cmpFromEvent(ev); });
+["pointerup","pointercancel"].forEach(x=> $("#cmpWrap").addEventListener(x, ()=>{ cmpDragging = false; }));
+
+const extFor = fmt => fmt === "image/webp" ? "webp" : fmt === "image/jpeg" ? "jpg" : "png";
+const outName = it => it.name.replace(/\.[^.]+$/, "") + "_no-bg." + extFor(getFormat());
+$("#dlBtn").addEventListener("click", ()=>{
+  const it = items.find(i=> i.id === selectedId);
+  if (it?.outUrl){ const a = document.createElement("a"); a.href = it.outUrl; a.download = outName(it); a.click(); }
+});
+$("#copyBtn").addEventListener("click", async ()=>{
+  const it = items.find(i=> i.id === selectedId);
+  if (!it?.outBlob) return;
+  try {
+    const pngBlob = it.outBlob.type === "image/png" ? it.outBlob : await canvasConvert(it.outBlob, "image/png");
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })]);
+    setStatus(t("copied"));
+  } catch (e){ setStatus(t("failedMsg") + e.message); }
+});
+$("#zipBtn").addEventListener("click", async ()=>{
+  const done = items.filter(i=> i.status === "done");
+  if (!done.length) return;
+  if (!window.JSZip){
+    await new Promise((res, rej)=>{
+      const s = document.createElement("script");
+      s.src = JSZIP; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+  }
+  const zip = new JSZip();
+  for (const it of done) zip.file(outName(it), it.outBlob);
+  const blob = await zip.generateAsync({ type:"blob" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "bg-removed.zip"; a.click();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 4000);
+});
+
+/* ---------- Magic Brush editor (Erase / Restore, Undo / Redo) ---------- */
+let editing = false, editItemId = null;
+let edBase = null, edOrig = null, maskErase = null, maskRestore = null;
+let undoStack = [], redoStack = [], drawing = false, lastPt = null, rafPending = false;
+const ec = $("#editCanvas"), ectx = ec.getContext("2d");
+wireSeg("brushSeg");
+const brushMode = ()=> segValue("brushSeg") || "erase";
+const mkCanvas = (w, h)=>{ const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
+
+async function enterEdit(){
+  const it = items.find(i=> i.id === selectedId);
+  if (!it || it.status !== "done" || editing) return;
+  editing = true; editItemId = it.id;
+  edBase = await createImageBitmap(it.alphaBlob);
+  edOrig = await createImageBitmap(it.file);
+  ec.width = edBase.width; ec.height = edBase.height;
+  maskErase = mkCanvas(ec.width, ec.height);
+  maskRestore = mkCanvas(ec.width, ec.height);
+  undoStack = []; redoStack = [];
+  renderEdit();
+  $("#cmpWrap").style.display = "none";
+  $("#emptyState").style.display = "none";
+  $("#editBar").style.display = "flex";
+  ec.style.display = "block";
+}
+function exitEdit(){
+  editing = false; editItemId = null;
+  $("#editBar").style.display = "none";
+  ec.style.display = "none";
+}
+function renderEdit(){
+  ectx.save();
+  ectx.globalCompositeOperation = "source-over";
+  ectx.clearRect(0, 0, ec.width, ec.height);
+  ectx.drawImage(edBase, 0, 0);
+  const tmp = mkCanvas(ec.width, ec.height);
+  const tctx = tmp.getContext("2d");
+  tctx.drawImage(edOrig, 0, 0);
+  tctx.globalCompositeOperation = "destination-in";
+  tctx.drawImage(maskRestore, 0, 0);
+  ectx.drawImage(tmp, 0, 0);
+  ectx.globalCompositeOperation = "destination-out";
+  ectx.drawImage(maskErase, 0, 0);
+  ectx.restore();
+}
+async function snapshotMasks(){
+  return { e: await createImageBitmap(maskErase), r: await createImageBitmap(maskRestore) };
+}
+async function pushHistory(){
+  undoStack.push(await snapshotMasks());
+  if (undoStack.length > 12) undoStack.shift();
+  redoStack = [];
+}
+function drawMaskSnapshot(mask, bmp){
+  const mctx = mask.getContext("2d");
+  mctx.save();
+  mctx.globalCompositeOperation = "source-over";
+  mctx.clearRect(0, 0, mask.width, mask.height);
+  mctx.drawImage(bmp, 0, 0);
+  mctx.restore();
+}
+async function doUndo(){
+  if (!undoStack.length || !editing) return;
+  redoStack.push(await snapshotMasks());
+  const s = undoStack.pop();
+  drawMaskSnapshot(maskErase, s.e); drawMaskSnapshot(maskRestore, s.r);
+  renderEdit();
+}
+async function doRedo(){
+  if (!redoStack.length || !editing) return;
+  undoStack.push(await snapshotMasks());
+  const s = redoStack.pop();
+  drawMaskSnapshot(maskErase, s.e); drawMaskSnapshot(maskRestore, s.r);
+  renderEdit();
+}
+function ecPoint(ev){
+  const r = ec.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) * ec.width / r.width, y: (ev.clientY - r.top) * ec.height / r.height };
+}
+function strokeTo(pt){
+  const mask = brushMode() === "erase" ? maskErase : maskRestore;
+  const mctx = mask.getContext("2d");
+  const r = ec.getBoundingClientRect();
+  mctx.strokeStyle = "#ffffff";
+  mctx.lineWidth = Number($("#brushSize").value) * (ec.width / r.width);
+  mctx.lineCap = "round"; mctx.lineJoin = "round";
+  mctx.beginPath();
+  if (lastPt){ mctx.moveTo(lastPt.x, lastPt.y); mctx.lineTo(pt.x, pt.y); }
+  else { mctx.moveTo(pt.x, pt.y); mctx.lineTo(pt.x + 0.01, pt.y + 0.01); }
+  mctx.stroke();
+  lastPt = pt;
+  if (!rafPending){
+    rafPending = true;
+    requestAnimationFrame(()=>{ rafPending = false; renderEdit(); });
+  }
+}
+ec.addEventListener("pointerdown", async ev=>{
+  if (!editing) return;
+  ev.preventDefault();
+  await pushHistory();
+  drawing = true; lastPt = null;
+  try { ec.setPointerCapture(ev.pointerId); } catch(_){}
+  strokeTo(ecPoint(ev));
+});
+ec.addEventListener("pointermove", ev=>{ if (drawing) strokeTo(ecPoint(ev)); });
+["pointerup","pointercancel"].forEach(x=> ec.addEventListener(x, ()=>{ drawing = false; lastPt = null; if (editing) renderEdit(); }));
+$("#editBtn").addEventListener("click", enterEdit);
+$("#undoBtn").addEventListener("click", doUndo);
+$("#redoBtn").addEventListener("click", doRedo);
+$("#editCancel").addEventListener("click", ()=>{ exitEdit(); showPreview(); });
+$("#editDone").addEventListener("click", async ()=>{
+  const it = items.find(i=> i.id === editItemId);
+  renderEdit();
+  const blob = await new Promise(res => ec.toBlob(res, "image/png"));
+  exitEdit();
+  if (it && blob){ it.alphaBlob = blob; await refreshOutput(it); }
+  renderQueue(); showPreview();
+});
+
+applyLang();
+showPreview();
+</script>
+</body>
+</html>
